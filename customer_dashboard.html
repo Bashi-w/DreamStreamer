@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Dashboard</title>
+    <link rel="stylesheet" href="./styles/customer.css" type="text/css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="./scripts/customer_common.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="sidebar">
+        <center>
+          <img
+            src="./images/logo-n.png"
+            alt="DreamStreamer Logo"
+            class="logo"
+          />
+          <p>DreamStreamer</p>
+        </center>
+        <!-- <i class="fas fa-user" id="user-icon"></i>
+        <div id="userDetails">
+          
+        </div> -->
+
+        <ul class="menu">
+          <li id="menuHome"><i class="fas fa-home"></i> Home</li>
+          <li id="menuAlbums"><i class="fas fa-record-vinyl"></i> Albums</li>
+          <li id="menuSearch"><i class="fas fa-search"></i> Search</li>
+          <li id="menuLibrary"><i class="fas fa-book"></i> Your Library</li>
+          <li id="menuLiked"><i class="fas fa-heart"></i> Liked Tracks</li>
+        </ul>
+
+        <button id="subscribe-btn">
+          <i class="fas fa-bell"></i> Subscribe
+        </button>
+
+        <a
+          href="https://dream-streamer.auth.us-east-1.amazoncognito.com/logout?client_id=6bsrtbnlgldgpdfcr7l9j0ajuc&logout_uri=https://d3olgxgavi4bx6.cloudfront.net/index.html"
+          class="logout-btn"
+          >Logout</a
+        >
+      </nav>
+      <main class="content">
+        <h1>Welcome to DreamStreamer, <span id="username"></span>!</h1>
+        <p>Your favorite music, all in one place.</p>
+
+        <!-- Albums Gallery -->
+        <div class="album-container" id="albums">
+          <!-- Albums will be inserted here by JavaScript -->
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // let userId; // Global variable to store user ID
+
+      document.addEventListener("DOMContentLoaded", function () {
+        fetchAlbums();
+        checkSubscriptionStatus();
+        // Get the ID token from the query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const idToken = urlParams.get("id_token");
+        console.log(idToken);
+
+        if (idToken) {
+          // Decode the ID token and display user details
+          const userDetails = parseJwt(idToken);
+          const userId = userDetails.sub; // Store user ID
+
+          localStorage.removeItem("userId");
+          // Save userId to localStorage
+          localStorage.setItem("userId", userId);
+
+          // Check for custom:user_type and save it in localStorage if available
+          // if (userDetails["custom:user_type"]) {
+          //   const userType = userDetails["custom:user_type"];
+          //   localStorage.setItem("userType", userType); // Save userType to localStorage
+          //   console.log("User Type:", userType);
+          // } else {
+          //   console.error("custom:user_type not found in token");
+          // }
+
+          if (userDetails.name) {
+            const fullName = userDetails.name;
+            const firstName = fullName.split(" ")[0]; // Get the first name
+            localStorage.setItem("firstName", firstName); // Save first name to localStorage
+            console.log("First Name:", firstName);
+          } else {
+            console.error("Name not found in token");
+          }
+
+          displayUserDetails(userDetails);
+        } else {
+          console.error("ID token not found in URL");
+        }
+      });
+
+      function parseJwt(token) {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+
+        return JSON.parse(jsonPayload);
+      }
+
+      function displayUserDetails(userDetails) {
+        const userDetailsDiv = document.getElementById("userDetails");
+        userDetailsDiv.innerHTML = `
+          <p>Name: ${userDetails.name}</p>
+          <p>Email: ${userDetails.email}</p>
+          <p>Birthday: ${userDetails.birthdate}</p>
+          <p>Gender: ${userDetails.gender}</p>
+      `;
+      }
+
+      function fetchAlbums() {
+        fetch(
+          "https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/albums"
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const albumsContainer = document.getElementById("albums");
+            const albums = data.Items; // Access the Items array
+
+            albumsContainer.innerHTML = ""; // Clear existing albums
+
+            // Iterate through each album
+            albums.forEach((album) => {
+              // Fetch the artist's name using the artistID from the album
+              fetchArtistName(album.Artist)
+                .then((artistName) => {
+                  // Create an album element and append it to the albums container
+                  const albumElement = document.createElement("a");
+                  albumElement.className = "album";
+                  albumElement.href = `view-album.html?id=${album.AlbumID}`; // Include album ID for navigation
+
+                  const albumArtURL = album.AlbumArtURL;
+
+                  albumElement.innerHTML = `
+              <img src="${albumArtURL}" alt="${album.AlbumName}">
+              <h2>${album.AlbumName}</h2>
+              <p>By: ${artistName}</p>
+            `;
+
+                  // Add an event listener to the album element to record engagement when clicked
+                  albumElement.addEventListener("click", (event) => {
+                    event.preventDefault();
+
+                    // Call the engagement API
+                    recordAlbumEngagement(album.AlbumID)
+                      .then(() => {
+                        // After recording engagement, navigate to the album's page
+                        window.location.href = albumElement.href;
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Error recording album engagement:",
+                          error
+                        );
+                        // Navigate to the album page even if engagement API fails
+                        window.location.href = albumElement.href;
+                      });
+                  });
+
+                  albumsContainer.appendChild(albumElement);
+                })
+                .catch((error) => {
+                  console.error("Error fetching artist name:", error);
+                });
+            });
+          })
+          .catch((error) => console.error("Error fetching albums:", error));
+      }
+
+      // Function to record the engagement for an album
+
+      function recordAlbumEngagement(albumID) {
+        return fetch(
+          "https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/album-engage",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              album_id: albumID, // Send album_id in the body
+            }),
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Failed to record engagement: ${response.status}`
+              );
+            }
+            return response.json();
+          })
+          .catch((error) => {
+            console.error("Error recording engagement:", error);
+          });
+      }
+
+      // Function to fetch the artist's name using the artistID
+      function fetchArtistName(artistID) {
+        return fetch(
+          `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/artist?ArtistID=${artistID}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.Item && data.Item.Name) {
+              return data.Item.Name; // Assuming the artist name is in 'Item.Name'
+            } else {
+              throw new Error("Artist not found");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching artist name:", error);
+            return "Unknown Artist"; // Handle error gracefully
+          });
+      }
+
+      function checkSubscriptionStatus() {
+        const userId = localStorage.getItem("userId"); // Get userId from localStorage
+        if (userId) {
+          fetch(
+            `https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/subscribe?user_id=${userId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              const subscribeButton = document.getElementById("subscribe-btn");
+              if (data.isSubscribed) {
+                subscribeButton.innerHTML = `<i class="fas fa-bell-slash"></i> Unsubscribe`;
+                subscribeButton.classList.remove("subscribe");
+                subscribeButton.classList.add("unsubscribe");
+              } else {
+                subscribeButton.innerHTML = `<i class="fas fa-bell"></i> Subscribe`;
+                subscribeButton.classList.remove("unsubscribe");
+                subscribeButton.classList.add("subscribe");
+              }
+            })
+            .catch((error) => {
+              console.error("Error checking subscription status:", error);
+            });
+        } else {
+          console.warn("User ID not found in localStorage");
+        }
+      }
+
+      // Handle navigation
+      document
+        .getElementById("menuHome")
+        .addEventListener("click", function () {
+          window.location.href = "index.html";
+        });
+      document
+        .getElementById("menuAlbums")
+        .addEventListener("click", function () {
+          window.location.href = "customer_dashboard.html";
+        });
+      document
+        .getElementById("menuSearch")
+        .addEventListener("click", function () {
+          window.location.href = "search.html";
+        });
+      document
+        .getElementById("menuLibrary")
+        .addEventListener("click", function () {
+          window.location.href = "library.html";
+        });
+      document
+        .getElementById("menuLiked")
+        .addEventListener("click", function () {
+          window.location.href = "liked.html";
+        });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const currentLocation = window.location.href;
+
+        const menuItems = {
+          home: document.getElementById("menuHome"),
+          albums: document.getElementById("menuAlbums"),
+          search: document.getElementById("menuSearch"),
+          library: document.getElementById("menuLibrary"),
+          liked: document.getElementById("menuLiked"),
+        };
+
+        // Remove active class from all menu items
+        function removeActiveClass() {
+          Object.values(menuItems).forEach((menuItem) => {
+            menuItem.classList.remove("active");
+          });
+        }
+
+        // Determine which menu item to highlight based on the URL
+        removeActiveClass(); // Reset all menu items
+        if (currentLocation.includes("index.html")) {
+          menuItems.home.classList.add("active");
+        } else if (currentLocation.includes("customer_dashboard.html")) {
+          menuItems.albums.classList.add("active");
+        } else if (currentLocation.includes("view-album.html")) {
+          menuItems.albums.classList.add("active");
+        } else if (currentLocation.includes("search.html")) {
+          menuItems.search.classList.add("active");
+        } else if (currentLocation.includes("library.html")) {
+          menuItems.library.classList.add("active");
+        } else if (currentLocation.includes("liked.html")) {
+          menuItems.liked.classList.add("active");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Retrieve the first name from localStorage
+        const firstName = localStorage.getItem("firstName");
+
+        // Check if the first name exists
+        if (firstName) {
+          // Find the element with the ID 'username' and set its text content
+          const usernameElement = document.getElementById("username");
+          if (usernameElement) {
+            usernameElement.textContent = firstName;
+          }
+        } else {
+          console.error("First name not found in localStorage");
+        }
+      });
+
+      document
+        .getElementById("subscribe-btn")
+        .addEventListener("click", function () {
+          const userId = localStorage.getItem("userId");
+
+          // Toggle subscription status
+          fetch(
+            "https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/subscribe",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username: userId,
+              }),
+            }
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Subscription updated:", data);
+
+              // After updating, check the current subscription status
+              return checkSubscriptionStatus();
+            })
+            .then((status) => {
+              console.log("Current subscription status:", status);
+              // Update the button text and class based on subscription status
+              const subscribeBtn = document.getElementById("subscribe-btn");
+              subscribeBtn.innerHTML = status.isSubscribed
+                ? '<i class="fas fa-bell-slash"></i> Unsubscribe'
+                : '<i class="fas fa-bell"></i> Subscribe';
+
+              if (status.isSubscribed) {
+                subscribeBtn.classList.remove("subscribe");
+                subscribeBtn.classList.add("unsubscribe");
+              } else {
+                subscribeBtn.classList.remove("unsubscribe");
+                subscribeBtn.classList.add("subscribe");
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating subscription:", error);
+            });
+        });
+    </script>
+    <!-- <script src="./scripts/customer_common.js"></script> -->
+  </body>
+</html>

@@ -1,0 +1,410 @@
+body {
+  font-family: "Inria Sans", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #181616;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-size: 1.1em;
+}
+
+/* Top bar styles */
+.topbar {
+  width: 100%;
+  height: 60px;
+  background-color: #0c0c0c;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #cccccc;
+}
+
+.topbar .user {
+  position: relative;
+  cursor: pointer;
+}
+
+.topbar .user i {
+  color: #c5b2ff;
+  font-size: 1.5em;
+}
+
+.topbar .dropdown {
+  display: none;
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background-color: #272727;
+  color: #fff;
+  border: 1px solid #444;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  width: 200px;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.topbar .dropdown.visible {
+  display: block;
+}
+
+/* Main layout with sidebar */
+.main-layout {
+  display: flex;
+  flex-grow: 1;
+  padding-top: 60px;
+}
+
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  background-color: #0c0c0c;
+  color: white;
+  height: calc(100vh - 60px);
+  padding-top: 20px;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+}
+
+.sidebar {
+  flex-grow: 1;
+}
+
+.sidebar li.active {
+  background-color: #313131;
+  color: #fff; 
+  font-weight: bold; 
+  border-radius: 8px;
+  padding: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.logout-container {
+  margin-top: auto; 
+}
+
+.logout-btn {
+  display: block;
+  width: 80%;
+  padding: 10px;
+  background-color: #000000;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background-color 0.3s;
+  margin-bottom: 2em;
+  margin-left: 0.5em;
+}
+
+.logout-btn:hover {
+  background-color: #111010; 
+}
+
+.logo {
+  width: 30%;
+  padding: 20px;
+  object-fit: contain;
+}
+
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 15px 20px;
+  font-size: 1.1em;
+  color: #cccccc;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar li:hover {
+  background-color: #2e2a2a;
+}
+
+.sidebar i {
+  margin-right: 10px;
+}
+
+.inventory-report-btn {
+  width: 90%;
+  margin: 20px 5%;
+  padding: 10px 0;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s;
+  font-size: 20px;
+  font-family: "Inria Sans", sans-serif;
+}
+
+.inventory-report-btn:hover {
+  background-color: #7d2c9c;
+}
+
+/* Content area */
+.content {
+  flex-grow: 1;
+  margin-left: 320px;
+  padding: 20px;
+  color: #fff;
+}
+
+.content-header h2 {
+  color: #cccccc;
+  font-size: 1.8em;
+}
+
+#openAddAlbumModal, #openAddTrackModal, #openAddArtistModal {
+  padding: 10px 20px;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 1em;
+  width: fit-content;
+  font-size: 20px;
+  font-family: "Inria Sans", sans-serif;
+}
+
+#openAddAlbumModal:hover {
+  background-color: #7d2c9c;
+}
+
+/* Modal container - hidden by default */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; 
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+/* Modal content */
+.modal-content {
+  background-color: #2e2a2a;
+  color: #fff;
+  padding: 20px;
+  margin-top: 5%;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80%; 
+  box-sizing: border-box;
+  border-radius: 12px;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* Close button */
+.close {
+  color: #9b59b6;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #fff; 
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Form styling */
+form {
+  margin-bottom: 20px;
+  background: #2e2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  font-family: "Inria Sans", sans-serif;
+}
+
+input,
+select,
+textarea,
+button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 8px; 
+}
+
+input,
+textarea,
+select {
+  background-color: #1f1d1d;
+  color: #cccccc;
+  font-family: "Inria Sans", sans-serif;
+  font-size: 1em;
+}
+
+form button {
+  background-color: #9b59b6; 
+  color: #cccccc;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+form button:hover {
+  background-color: #7d2c9c; 
+}
+
+.band-member-div {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-gap: 1em;
+}
+
+.band-composition {
+  flex: 1; /* Allow input to take available space */
+  margin-right: 10px; /* Space between input and button */
+}
+
+.remove-band-member {
+  background-color: #e74c3c; /* Red color for the remove button */
+  color: white;
+  border: none;
+  padding: 10px 15px; /* Padding for the button */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.remove-band-member:hover {
+  background-color: #c0392b; /* Darker red on hover */
+}
+
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #0c0c0c;
+  color: #cccccc;
+}
+
+table th,
+table td {
+  padding: 10px;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+table img {
+  border-radius: 10%;
+}
+
+table th {
+  background-color: #9b59b6;
+  color: #ffffff;
+}
+
+table tbody tr:nth-child(even) {
+  /* background-color: #272727; */
+  background-color: #0c0c0c;
+}
+
+#filterContainer {
+  font-family: "Inria Sans", sans-serif;
+  display: flex;
+  gap: 20px;
+  padding: 15px 20px;
+  background-color: #0c0c0c;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+#filterContainer select,
+#filterContainer input[type="text"] {
+  font-family: "Inria Sans", sans-serif;
+  padding: 10px;
+  border: 1px solid#9b59b6;
+  background-color: #1f1d1d;
+  color: #cccccc;
+  border-radius: 6px;
+  font-size: 1.02em;
+}
+
+#filterContainer button {
+  font-family: "Inria Sans", sans-serif;
+  padding: 10px 20px;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1.02em;
+}
+
+#filterContainer #applyFilters:hover {
+  background-color: #7d2c9c;
+}
+
+#filterContainer #clearFilters {
+  background-color: #272727;
+}
+
+#filterContainer #clearFilters:hover {
+  background-color: #333232;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 33%;
+  border-bottom: none;
+}
+
+.table-actions button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.3em;
+  color: #9b59b6;
+  transition: color 0.3s;
+}
+
+.table-actions button:hover {
+  color: #7d2c9c;
+}

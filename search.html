@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Dashboard</title>
+    <link rel="stylesheet" href="./styles/customer.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <nav class="sidebar">
+        <center>
+          <img
+            src="./images/logo-n.png"
+            alt="DreamStreamer Logo"
+            class="logo"
+          />
+          <p>DreamStreamer</p>
+        </center>
+        <!-- <i class="fas fa-user" id="user-icon"></i>
+        <div id="userDetails">
+          
+        </div> -->
+
+        <ul class="menu">
+          <li id="menuHome"><i class="fas fa-home"></i> Home</li>
+          <li id="menuAlbums"><i class="fas fa-record-vinyl"></i> Albums</li>
+          <li id="menuSearch"><i class="fas fa-search"></i> Search</li>
+          <li id="menuLibrary"><i class="fas fa-book"></i> Your Library</li>
+          <li id="menuLiked"><i class="fas fa-heart"></i> Liked Tracks</li>
+        </ul>
+
+        <a
+          href="https://dream-streamer.auth.us-east-1.amazoncognito.com/logout?client_id=6bsrtbnlgldgpdfcr7l9j0ajuc&logout_uri=https://d3olgxgavi4bx6.cloudfront.net/index.html"
+          class="logout-btn"
+          >Logout</a
+        >
+      </nav>
+      <main class="content">
+        <h1>Search</h1>
+
+        <div id="filterContainer">
+          <select id="filterGenre">
+            <option value="">All Genres</option>
+            <option value="Metal">Metal</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Hip Hop">Hip Hop</option>
+            <option value="Reggae">Reggae</option>
+            <option value="Classical">Classical</option>
+            <!-- Add more genres here -->
+          </select>
+
+          <select id="filterArtist">
+            <option value="">All Artists</option>
+            <!-- Artists will be populated dynamically -->
+          </select>
+
+          <input
+            type="text"
+            id="filterAlbum"
+            placeholder="Search by Album Name"
+          />
+          <input
+            type="text"
+            id="filterTrack"
+            placeholder="Search by Track Name"
+          />
+
+          <button id="applyFilters">Apply Filters</button>
+          <button id="clearFilters">Clear Filters</button>
+        </div>
+
+        <!-- Albums Gallery -->
+        <div class="album-container" id="albums">
+          <!-- Albums will be inserted here by JavaScript -->
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Handle navigation
+      document
+        .getElementById("menuHome")
+        .addEventListener("click", function () {
+          window.location.href = "index.html";
+        });
+      document
+        .getElementById("menuAlbums")
+        .addEventListener("click", function () {
+          window.location.href = "customer_dashboard.html";
+        });
+      document
+        .getElementById("menuSearch")
+        .addEventListener("click", function () {
+          window.location.href = "search.html";
+        });
+      document
+        .getElementById("menuLibrary")
+        .addEventListener("click", function () {
+          window.location.href = "library.html";
+        });
+      document
+        .getElementById("menuLiked")
+        .addEventListener("click", function () {
+          window.location.href = "liked.html";
+        });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const currentLocation = window.location.href;
+
+        const menuItems = {
+          home: document.getElementById("menuHome"),
+          albums: document.getElementById("menuAlbums"),
+          search: document.getElementById("menuSearch"),
+          library: document.getElementById("menuLibrary"),
+          liked: document.getElementById("menuLiked"),
+        };
+
+        // Remove active class from all menu items
+        function removeActiveClass() {
+          Object.values(menuItems).forEach((menuItem) => {
+            menuItem.classList.remove("active");
+          });
+        }
+
+        // Determine which menu item to highlight based on the URL
+        removeActiveClass(); // Reset all menu items
+        if (currentLocation.includes("index.html")) {
+          menuItems.home.classList.add("active");
+        } else if (currentLocation.includes("customer_dashboard.html")) {
+          menuItems.albums.classList.add("active");
+        } else if (currentLocation.includes("search.html")) {
+          menuItems.search.classList.add("active");
+        } else if (currentLocation.includes("library.html")) {
+          menuItems.library.classList.add("active");
+        } else if (currentLocation.includes("liked.html")) {
+          menuItems.liked.classList.add("active");
+        }
+      });
+      fetchArtists();
+
+      function fetchArtists() {
+        fetch(
+          "https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/artists"
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.Operation === "GET" && data.Message === "SUCCESS") {
+              artistsData = data.Items.reduce((acc, artist) => {
+                acc[artist.ArtistID] = artist.Name; // Map ArtistID to Name
+                return acc;
+              }, {});
+
+              populateArtistDropdowns();
+            } else {
+              console.error("Failed to fetch artists:", data);
+            }
+          })
+          .catch((error) => console.error("Error fetching artists:", error));
+      }
+
+      function populateArtistDropdowns() {
+        const artistDropdownFilter = document.getElementById("filterArtist");
+        artistDropdownFilter.innerHTML =
+          '<option value="">All Artists</option>';
+
+        Object.entries(artistsData).forEach(([artistID, artistName]) => {
+          const option = document.createElement("option");
+          option.value = artistID;
+          option.textContent = artistName;
+          artistDropdownFilter.appendChild(option);
+        });
+      }
+
+      function fetchTracksForAlbum(albumID) {
+        fetch(
+          `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/album-tracks?AlbumID=${albumID}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const tracks = data.Items || []; // Default to empty array if Items is not present
+            const tracksContainer = document.getElementById(
+              `tracks-${albumID}`
+            );
+
+            if (Array.isArray(tracks) && tracks.length > 0) {
+              tracksContainer.innerHTML = tracks
+                .map((track) => `<li>${track.Name}</li>`)
+                .join("");
+            } else {
+              tracksContainer.innerHTML = "<li>No tracks available.</li>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching tracks:", error);
+            const tracksContainer = document.getElementById(
+              `tracks-${albumID}`
+            );
+            tracksContainer.innerHTML = "<li>Error fetching tracks.</li>";
+          });
+      }
+
+      document
+        .getElementById("applyFilters")
+        .addEventListener("click", function () {
+          const selectedGenre = document.getElementById("filterGenre").value;
+          const selectedArtist = document.getElementById("filterArtist").value;
+          const albumName = document.getElementById("filterAlbum").value;
+          const trackName = document.getElementById("filterTrack").value;
+
+          let queryParams = [];
+
+          if (selectedGenre) {
+            queryParams.push(`Genre=${encodeURIComponent(selectedGenre)}`);
+          }
+
+          if (selectedArtist) {
+            queryParams.push(`Artist=${encodeURIComponent(selectedArtist)}`);
+          }
+
+          if (albumName) {
+            queryParams.push(`AlbumName=${encodeURIComponent(albumName)}`);
+          }
+
+          if (trackName) {
+            queryParams.push(`TrackName=${encodeURIComponent(trackName)}`);
+          }
+
+          const queryString =
+            queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
+          const apiUrl = `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/filter-albums${queryString}`;
+
+          fetch(apiUrl)
+            .then((response) => response.json())
+            .then((data) => {
+              const albumsContainer = document.getElementById("albums");
+              albumsContainer.innerHTML = ""; // Clear the current album display
+
+              if (data.albums && data.albums.length > 0) {
+                data.albums.forEach((album) => {
+                  // Create an anchor element to wrap the album element
+                  const albumElement = document.createElement("a");
+                  albumElement.className = "album";
+                  albumElement.href = `view-album.html?id=${album.AlbumID}`;
+
+                  const albumArtURL =
+                    album.AlbumArtURL || "default-placeholder.webp";
+                  const artistNames = album.Artists
+                    ? album.Artists.map(
+                        (id) => artistsData[id] || "Unknown"
+                      ).join(", ")
+                    : "Unknown Artist";
+
+                  albumElement.innerHTML = `
+            <img src="${albumArtURL}" alt="${album.AlbumName}">
+            <h2>${album.AlbumName}</h2>
+            <p><strong>Year:</strong> ${album.AlbumYear}</p>
+            <p><strong>Genre:</strong> ${album.Genre}</p>
+            <p><strong>Tracks:</strong></p>
+            <ul id="tracks-${album.AlbumID}">
+              <!-- Tracks will be loaded here -->
+            </ul>
+          `;
+
+                  // Add an event listener to the album element to record engagement when clicked
+                  albumElement.addEventListener("click", (event) => {
+                    // Prevent the default navigation behavior (temporarily) to ensure the API call is made first
+                    event.preventDefault();
+
+                    // Call the engagement API
+                    recordAlbumEngagement(album.AlbumID)
+                      .then(() => {
+                        // After recording engagement, navigate to the album's page
+                        window.location.href = albumElement.href;
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Error recording album engagement:",
+                          error
+                        );
+                        // Navigate to the album page even if engagement API fails
+                        window.location.href = albumElement.href;
+                      });
+                  });
+
+                  albumsContainer.appendChild(albumElement);
+
+                  // Fetch and display tracks for each album
+                  fetchTracksForAlbum(album.AlbumID);
+                });
+              } else {
+                albumsContainer.innerHTML =
+                  "<p>No albums found for the selected filters.</p>";
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching filtered albums:", error);
+            });
+        });
+
+      function recordAlbumEngagement(albumID) {
+        return fetch(
+          "https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/album-engage",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              album_id: albumID, // Send album_id in the body
+            }),
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Failed to record engagement: ${response.status}`
+              );
+            }
+            return response.json(); // Optional: Handle the response from the API if needed
+          })
+          .catch((error) => {
+            console.error("Error recording engagement:", error);
+          });
+      }
+
+      document
+        .getElementById("clearFilters")
+        .addEventListener("click", function () {
+          location.reload();
+        });
+    </script>
+  </body>
+</html>

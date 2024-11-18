@@ -1,0 +1,611 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inria Sans", sans-serif;
+  background-color: #121212;
+  color: #fff;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  /* height: 100vh; */
+}
+
+.sidebar {
+  min-width: 20em;
+  max-width: 20em; 
+  background-color: #0c0c0c;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100vh;
+  position: sticky; /* Ensure it sticks during scroll */
+  top: 0; /* Stick to the top */
+}
+
+
+
+.sidebar .logo h2 {
+  margin: 0;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.sidebar .menu {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  margin-top: 2em;
+}
+
+.sidebar .menu li {
+  margin-bottom: 10px;
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar button {
+  display: flex; 
+  align-items: center;
+  justify-content: center; 
+  gap: 10px; 
+  width: 100%;
+  padding: 12px 0;
+  margin-top: 15px;
+  background-color: #9b59b6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sidebar button i {
+  font-size: 1.2em; /* Adjust icon size */
+  color: #fff; /* Make the icon white */
+}
+
+.sidebar button:hover {
+  background-color: #8e44ad; 
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4); 
+}
+
+
+
+.sidebar .menu li i {
+  margin-right: 15px;
+}
+
+.sidebar .menu li:hover {
+  background-color: #333;
+}
+
+.sidebar .menu li.active {
+  background-color: #313131;
+  color: #fff; 
+  font-weight: bold; 
+  border-radius: 8px;
+  padding: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+
+
+.logo {
+  width: 40%;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #181818;
+  overflow-y: hidden; 
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 18px;
+  color: #b3b3b3;
+}
+
+.container {
+  display: flex;
+}
+
+/* .album-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  margin-top: 20px;
+  justify-items: center;
+} */
+
+.album-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+
+
+.album {
+  background-color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 18em;
+  text-align: center;
+  padding: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #fff;
+  overflow: hidden;
+}
+
+.album img {
+  max-width: 100%;
+  height: 250px;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.album h2 {
+  font-size: 1.1em;
+  margin: 12px 0 5px 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+
+.album:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+}
+
+.album:hover img {
+  transform: scale(1.05);
+}
+
+.album:hover h2 {
+  color: #9b59b6;
+}
+
+.album p {
+  font-size: 0.9em;
+  color: #b3b3b3;
+  margin: 5px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#user-icon {
+  align-self: center;
+  font-size: 2em;
+}
+
+#userDetails p {
+  font-size: smaller;
+  text-align: center;
+  margin-top: 1em;
+}
+
+/* Logout button at the bottom and full-width */
+.logout-btn {
+  margin-top: auto; /* Pushes the button to the bottom */
+  background-color: #292828;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 100%; /* Full width of the sidebar */
+  box-sizing: border-box; /* Ensure padding does not affect width */
+}
+
+.logout-btn:hover {
+  background-color: #161616;
+}
+
+/* Album details styling */
+.album-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.album-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; 
+  margin-bottom: 20px;
+  border-bottom: 1px solid #444;
+}
+
+.album-art {
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-right: 20px; /* Space between image and info */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.album-info {
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  
+}
+
+.album-info h2 {
+  font-size: 2em;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.album-info p {
+  font-size: 1.2em;
+  color: #b3b3b3;
+  margin: 5px 0;
+}
+
+.purchase-btn {
+  background: #9b59b6;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.purchase-btn:hover {
+  background: #8e44ad;
+}
+
+
+
+/* Tracks list styling */
+#tracksList {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  position: relative;
+  background: #111;
+  border-radius: 12px; /* Smooth rounded corners */
+  transition: background 0.3s ease, transform 0.3s ease; /* Smooth hover effects */
+}
+
+.track-item:hover {
+  background: #000000;
+}
+
+.track-art {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px; 
+  object-fit: cover;
+  margin-right: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.track-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.track-info strong {
+  font-size: 1.1em;
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.track-info p {
+  font-size: 0.9em;
+  color: #b3b3b3;
+}
+
+.track-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto; 
+}
+
+.like-btn,
+.download-btn {
+  background: transparent;
+  color: #9b59b6;
+  border: none;
+  padding: 10px;
+  border-radius: 50%; /* Circular buttons */
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, color 0.3s, transform 0.3s;
+  margin-left: 10px;
+}
+
+.like-btn:hover,
+.download-btn:hover {
+  background: rgba(155, 89, 182, 0.2); /* Light purple background on hover */
+  transform: scale(1.1); /* Slight zoom effect */
+}
+
+.like-btn i,
+.download-btn i {
+  font-size: 1.4em;
+}
+
+.download-btn:disabled i,
+.disabled-icon {
+  color: #a5a5a5;
+  cursor: not-allowed;
+}
+
+
+
+.audio-player {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+  border-radius: 8px;
+  padding: 10px;
+  margin-right: 8em;
+}
+
+audio {
+  width: 80%;
+  outline: none;
+  color: #9b59b6; /* Controls color */
+}
+
+audio::-webkit-media-controls-panel {
+  background-color: #f3f3f3;; 
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-timeline,
+audio::-webkit-media-controls-mute-button,
+audio::-webkit-media-controls-volume-slider {
+  filter: hue-rotate(280deg) brightness(1.2); /* Purple hue for controls */
+}
+
+.back-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+}
+
+#back {
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#back:hover {
+  color: #1db954;
+}
+
+/* Modal Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+}
+
+.modal-content {
+  position: relative;
+  margin: 10% auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  padding: 10px;
+}
+
+.modal-header {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 25px;
+  cursor: pointer;
+  color: #000;
+}
+
+.modal-footer {
+  text-align: right;
+}
+
+.purchase-confirm-btn {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.purchase-confirm-btn:hover {
+  background-color: #45a049;
+}
+
+/* Form Styles */
+.purchase-form input,
+.purchase-form select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.purchase-form label {
+  margin-bottom: 5px;
+  display: block;
+  font-weight: bold;
+  color: #000;
+}
+
+#filterContainer {
+  font-family: "Inria Sans", sans-serif;
+  display: flex;
+  gap: 20px;
+  padding: 15px 20px;
+  background-color: #0c0c0c;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+#filterContainer select,
+#filterContainer input[type="text"] {
+  font-family: "Inria Sans", sans-serif;
+  padding: 10px;
+  border: 1px solid#9b59b6;
+  background-color: #1f1d1d;
+  color: white;
+  border-radius: 6px;
+  font-size: 1.02em;
+}
+
+#filterContainer button {
+  font-family: "Inria Sans", sans-serif;
+  padding: 10px 20px;
+  background-color: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1.02em;
+}
+
+#filterContainer #applyFilters:hover {
+  background-color: #7d2c9c;
+}
+
+#filterContainer #clearFilters {
+  background-color: #272727;
+}
+
+#filterContainer #clearFilters:hover {
+  background-color: #333232;
+}
+
+/* Styles for subscribe button */
+#subscribe-btn.subscribe {
+  background-color: #9b59b6; /* Green */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* Styles for unsubscribe button */
+#subscribe-btn.unsubscribe {
+  background-color: #5f5f5f; /* Red */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="./styles/admin.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="./scripts/admin_common.js"></script>
+  </head>
+  <body>
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1>DreamStreamer Admin Dashboard: Manage Artists</h1>
+      <div class="user">
+        <i class="fas fa-user"></i>
+
+        <div class="dropdown" id="userDetails">
+          <!-- User details will be shown here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Sidebar -->
+      <div class="sidebar-container">
+        <center>
+          <img
+            src="./images/logo-n.png"
+            alt="DreamStreamer Logo"
+            class="logo"
+          />
+        </center>
+        <nav class="sidebar">
+          <ul>
+            <li id="menuHome"><i class="fas fa-home"></i> Home</li>
+            <li id="menuAlbums"><i class="fas fa-record-vinyl"></i> Albums</li>
+            <li id="menuTracks"><i class="fas fa-music"></i> Tracks</li>
+            <li id="menuArtists"><i class="fas fa-user"></i> Artists</li>
+          </ul>
+          <button id="requestInventoryReport" class="inventory-report-btn">
+            Request Inventory Report
+          </button>
+        </nav>
+        <div class="logout-container">
+          <a
+            href="https://dream-streamer.auth.us-east-1.amazoncognito.com/logout?client_id=6bsrtbnlgldgpdfcr7l9j0ajuc&logout_uri=https://d3olgxgavi4bx6.cloudfront.net/index.html"
+            class="logout-btn"
+          >
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="content" id="content">
+        <div id="filterContainer">
+          <select id="filterGenre">
+            <option value="">All Genres</option>
+            <option value="Metal">Metal</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Hip Hop">Hip Hop</option>
+            <option value="Reggae">Reggae</option>
+            <option value="Classical">Classical</option>
+            <!-- Add more genres here -->
+          </select>
+
+          <select id="filterArtist">
+            <option value="">All Artists</option>
+            <!-- Artists will be populated dynamically -->
+          </select>
+
+          <select id="filterAlbum">
+            <option value="">All Albums</option>
+            <!-- Albums will be populated dynamically -->
+          </select>
+
+          <select id="filterTrack">
+            <option value="">All Tracks</option>
+            <!-- Tracks will be populated dynamically -->
+          </select>
+
+          <button id="applyFilters">Apply Filters</button>
+          <button id="clearFilters">Clear Filters</button>
+        </div>
+
+        <div class="content-header">
+          <h2>Artists</h2>
+          <button id="openAddArtistModal">Add Artist</button>
+        </div>
+
+        <!-- Modal for Adding Artist -->
+        <div id="addArtistModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Add Artist</h3>
+
+            <!-- Artist Form Inside Modal -->
+            <form id="artistForm">
+              <input
+                type="text"
+                id="artistID"
+                placeholder="Artist ID (e.g., ART123)"
+                required
+              />
+              <input
+                type="text"
+                id="artistName"
+                placeholder="Artist Name"
+                required
+              />
+              <input
+                type="number"
+                id="debutYear"
+                placeholder="Debut Year"
+                required
+                min="1900"
+                max="2099"
+                step="1"
+              />
+              <textarea
+                id="artistBio"
+                placeholder="Artist Bio"
+                required
+              ></textarea>
+              <input type="file" id="artistImage" accept="image/*" required />
+              <button type="submit">Add Artist</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Artists will be displayed here -->
+        <div class="artists-container" id="artists"></div>
+
+        <!-- Modal for Editing Artist -->
+        <div id="editArtistModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Edit Artist</h3>
+
+            <!-- Artist Form Inside Modal -->
+            <form id="editArtistForm">
+              <input
+                type="text"
+                id="editArtistID"
+                placeholder="Artist ID (e.g., ART123)"
+                required
+                readonly
+              />
+              <input
+                type="text"
+                id="editArtistName"
+                placeholder="Artist Name"
+                required
+              />
+              <input
+                type="number"
+                id="editDebutYear"
+                placeholder="Debut Year"
+                required
+                min="1900"
+                max="2099"
+                step="1"
+              />
+              <textarea
+                id="editArtistBio"
+                placeholder="Artist Bio"
+                required
+              ></textarea>
+              <input type="file" id="editArtistImage" accept="image/*" />
+              <button type="submit">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./scripts/admin_artists.js"></script>
+
+  </body>
+</html>

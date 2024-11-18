@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard: Albums</title>
+    <!-- <link rel="stylesheet" href="./styles/admin.css" /> -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/admin.css" />
+    <script src="./scripts/admin_common.js"></script>
+  </head>
+  <body>
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1>DreamStreamer Admin Dashboard: Manage Albums</h1>
+      <div class="user">
+        <i class="fas fa-user"></i>
+
+        <div class="dropdown" id="userDetails">
+          <!-- User details will be shown here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Sidebar -->
+      <div class="sidebar-container">
+        <center>
+          <img
+            src="./images/logo-n.png"
+            alt="DreamStreamer Logo"
+            class="logo"
+          />
+        </center>
+        <nav class="sidebar">
+          <ul>
+            <li id="menuHome"><i class="fas fa-home"></i> Home</li>
+            <li id="menuAlbums"><i class="fas fa-record-vinyl"></i> Albums</li>
+            <li id="menuTracks"><i class="fas fa-music"></i> Tracks</li>
+            <li id="menuArtists"><i class="fas fa-user"></i> Artists</li>
+          </ul>
+          <button id="requestInventoryReport" class="inventory-report-btn">
+            Request Inventory Report
+          </button>
+        </nav>
+        <div class="logout-container">
+          <a
+            href="https://dream-streamer.auth.us-east-1.amazoncognito.com/logout?client_id=6bsrtbnlgldgpdfcr7l9j0ajuc&logout_uri=https://d3olgxgavi4bx6.cloudfront.net/index.html"
+            class="logout-btn"
+          >
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="content" id="content">
+        <div id="filterContainer">
+          <select id="filterGenre">
+            <option value="">All Genres</option>
+            <option value="Metal">Metal</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Hip Hop">Hip Hop</option>
+            <option value="Reggae">Reggae</option>
+            <option value="Classical">Classical</option>
+            <!-- Add more genres here -->
+          </select>
+
+          <select id="filterArtist">
+            <option value="">All Artists</option>
+            <!-- Artists will be populated dynamically -->
+          </select>
+
+          <input
+            type="text"
+            id="filterAlbum"
+            placeholder="Search by Album Name"
+          />
+          <input
+            type="text"
+            id="filterTrack"
+            placeholder="Search by Track Name"
+          />
+
+          <button id="applyFilters">Apply Filters</button>
+          <button id="clearFilters">Clear Filters</button>
+        </div>
+
+        <div class="content-header">
+          <h2>Albums</h2>
+          <button id="openAddAlbumModal">Add Album</button>
+        </div>
+
+        <!-- Modal for Adding Album -->
+        <div id="addAlbumModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Add Album</h3>
+
+            <form id="albumForm">
+              <input
+                type="text"
+                id="albumID"
+                placeholder="Album ID (e.g., ALB002)"
+                required
+              />
+              <input
+                type="text"
+                id="albumName"
+                placeholder="Album Name"
+                required
+              />
+              <select id="artistDropdown" required>
+                <option value="">Select Artist</option>
+                <!-- Artist options will be populated here -->
+              </select>
+
+              <input
+                type="number"
+                id="albumYear"
+                placeholder="Album Year"
+                required
+                min="1900"
+                max="2099"
+                step="1"
+              />
+
+              <select id="genre" required>
+                <option value="">Select Genre</option>
+                <option value="Metal">Metal</option>
+                <option value="Rock">Rock</option>
+                <option value="Pop">Pop</option>
+                <option value="Hip Hop">Hip Hop</option>
+                <option value="Reggae">Reggae</option>
+                <option value="Classical">Classical</option>
+              </select>
+
+              <div id="bandCompositionContainer">
+                <input
+                  type="text"
+                  class="band-composition"
+                  placeholder="Role: Name (e.g: Guitarist: John Doe)"
+                  required
+                />
+              </div>
+              <button type="button" id="addBandMember">Add Band Member</button>
+
+              <input type="file" id="albumArt" accept="image/*" required />
+              <input
+                type="number"
+                id="albumPrice"
+                placeholder="Album Price"
+                step="0.01"
+                min="0"
+              />
+              <button type="submit">Add Album</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Modal for Editing Album -->
+        <div id="editAlbumModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Edit Album</h3>
+
+            <!-- Album Form Inside Modal -->
+            <form id="editAlbumForm">
+              <input type="hidden" id="currentAlbumArtURL" value="" />
+              <input
+                type="text"
+                id="editAlbumID"
+                placeholder="Album ID (e.g., ALB002)"
+                required
+                readonly
+              />
+              <input
+                type="text"
+                id="editAlbumName"
+                placeholder="Album Name"
+                required
+              />
+              <select id="editArtistDropdown" required>
+                <option value="">Select Artist</option>
+              </select>
+              <input
+                type="number"
+                id="editAlbumYear"
+                placeholder="Album Year"
+                required
+                min="1900"
+                max="2099"
+                step="1"
+              />
+
+              <select id="editGenre" required>
+                <option value="">Select Genre</option>
+                <option value="Metal">Metal</option>
+                <option value="Rock">Rock</option>
+                <option value="Pop">Pop</option>
+                <option value="Hip Hop">Hip Hop</option>
+                <option value="Reggae">Reggae</option>
+                <option value="Classical">Classical</option>
+              </select>
+
+              <div id="editBandMembersContainer"></div>
+              <button type="button" id="addEditBandMember">
+                Add Band Member
+              </button>
+
+              <input type="file" id="editAlbumArt" accept="image/*" />
+              <input
+                type="number"
+                id="editAlbumPrice"
+                placeholder="Album Price"
+                step="0.01"
+                min="0"
+              />
+
+              <button type="submit">Save Changes</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Albums will be displayed here -->
+        <div class="album-container" id="albums"></div>
+      </div>
+    </div>
+
+    <script src="./scripts/admin_albums.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard: Tracks</title>
+    <link rel="stylesheet" href="./styles/admin.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="./scripts/admin_common.js"></script>
+  </head>
+  <body>
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1>DreamStreamer Admin Dashboard: Manage Tracks</h1>
+      <div class="user">
+        <i class="fas fa-user"></i>
+
+        <div class="dropdown" id="userDetails">
+          <!-- User details will be shown here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Sidebar -->
+      <div class="sidebar-container">
+        <center>
+          <img
+            src="./images/logo-n.png"
+            alt="DreamStreamer Logo"
+            class="logo"
+          />
+        </center>
+        <nav class="sidebar">
+          <ul>
+            <li id="menuHome"><i class="fas fa-home"></i> Home</li>
+            <li id="menuAlbums"><i class="fas fa-record-vinyl"></i> Albums</li>
+            <li id="menuTracks"><i class="fas fa-music"></i> Tracks</li>
+            <li id="menuArtists"><i class="fas fa-user"></i> Artists</li>
+          </ul>
+          <button id="requestInventoryReport" class="inventory-report-btn">
+            Request Inventory Report
+          </button>
+        </nav>
+        <div class="logout-container">
+          <a
+            href="https://dream-streamer.auth.us-east-1.amazoncognito.com/logout?client_id=6bsrtbnlgldgpdfcr7l9j0ajuc&logout_uri=https://d3olgxgavi4bx6.cloudfront.net/index.html"
+            class="logout-btn"
+          >
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="content" id="content">
+        <div id="filterContainer">
+          <select id="filterGenre">
+            <option value="">All Genres</option>
+            <option value="Metal">Metal</option>
+            <option value="Rock">Rock</option>
+            <option value="Pop">Pop</option>
+            <option value="Hip Hop">Hip Hop</option>
+            <option value="Reggae">Reggae</option>
+            <option value="Classical">Classical</option>
+            <!-- Add more genres here -->
+          </select>
+
+          <select id="filterArtist">
+            <option value="">All Artists</option>
+            <!-- Artists will be populated dynamically -->
+          </select>
+
+          <input
+            type="text"
+            id="filterAlbum"
+            placeholder="Search by Album Name"
+          />
+          <input
+            type="text"
+            id="filterTrack"
+            placeholder="Search by Track Name"
+          />
+
+          <button id="applyFilters">Apply Filters</button>
+          <button id="clearFilters">Clear Filters</button>
+        </div>
+
+        <div class="content-header">
+          <h2>Tracks</h2>
+          <button id="openAddTrackModal">Add Track</button>
+        </div>
+
+        <!-- Modal for Adding Track -->
+        <div id="addTrackModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Add Track</h3>
+            <!-- Track Form Inside Modal -->
+            <form id="trackForm">
+              <input
+                type="text"
+                id="trackID"
+                placeholder="Track ID (e.g., TRK123)"
+                required
+              />
+              <input
+                type="text"
+                id="trackName"
+                placeholder="Track Name"
+                required
+              />
+              <!-- Dropdown for Albums -->
+              <select id="trackAlbumID" required>
+                <option value="" disabled selected>Select Album</option>
+                <!-- Options will be populated by JavaScript -->
+              </select>
+              <input
+                type="date"
+                id="trackReleaseDate"
+                placeholder="Release Date"
+                required
+              />
+              <input
+                type="text"
+                id="trackLabel"
+                placeholder="Label"
+                required
+              />
+              <label for="trackImage">Track Image</label>
+              <input type="file" id="trackImage" accept="image/*" />
+
+              <label for="trackImage">Track Audio</label>
+              <input type="file" id="trackMusic" accept="audio/*" />
+              <button type="submit">Add Track</button>
+            </form>
+          </div>
+        </div>
+        
+
+        <!-- Tracks will be displayed here -->
+        <div class="tracks-container" id="tracks"></div>
+
+        <!-- Modal for Editing Track -->
+        <div id="editTrackModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Edit Track</h3>
+            <!-- Track Form Inside Modal -->
+            <form id="editTrackForm">
+              <input
+                type="text"
+                id="editTrackID"
+                placeholder="Track ID (e.g., TRK123)"
+                required
+                readonly
+              />
+        
+              <input
+                type="text"
+                id="editTrackName"
+                placeholder="Track Name"
+                required
+              />
+        
+              <!-- Dropdown for Albums -->
+              <select id="editTrackAlbumID" required>
+                <option value="" disabled selected>Select Album</option>
+                <!-- Options will be populated by JavaScript -->
+              </select>
+        
+              <input
+                type="date"
+                id="editTrackReleaseDate"
+                placeholder="Release Date"
+                required
+              />
+        
+              <input
+                type="text"
+                id="editTrackLabel"
+                placeholder="Label"
+                required
+              />
+        
+              <input type="file" id="editTrackImage" accept="image/*" />
+        
+              <input type="file" id="editTrackMusic" accept="audio/*" />
+        
+              <button type="submit">Save Changes</button>
+            </form>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <script src="./scripts/admin_tracks.js"></script>
+    
+  </body>
+</html>

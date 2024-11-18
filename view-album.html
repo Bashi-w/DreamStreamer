@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Album Details</title>
+    <link rel="stylesheet" href="./styles/customer.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      #artistModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      
+      #purchaseModal .modal-header{
+        color: #161616;
+      }
+
+      #artistModal .modal-content {
+        position: relative;
+        margin: 10% auto;
+        padding: 20px;
+        background-color: #161616;
+        border-radius: 20px; /* Rounded corners for the modal */
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center; /* Centering text */
+      }
+
+      #artistModal .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 25px;
+        cursor: pointer;
+        color: #e6e6e6;
+      }
+
+      .artist-modal-body img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%; /* Makes the image circular */
+        object-fit: cover; /* Ensures the image covers the area properly */
+        margin-bottom: 15px;
+      }
+
+      .artist-modal-body h2 {
+        margin: 10px 0;
+        font-size: 24px;
+      }
+
+      .artist-modal-body p {
+        font-size: 16px;
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="sidebar">
+        <center>
+          <img
+            src="./images/logo-n.png"
+            alt="DreamStreamer Logo"
+            class="logo"
+          />
+          <p>DreamStreamer</p>
+        </center>
+        <!-- <i class="fas fa-user" id="user-icon"></i>
+        <div id="userDetails">
+          
+        </div> -->
+
+        <ul class="menu">
+          <li id="menuHome"><i class="fas fa-home"></i> Home</li>
+          <li id="menuAlbums"><i class="fas fa-record-vinyl"></i> Albums</li>
+          <li id="menuSearch"><i class="fas fa-search"></i> Search</li>
+          <li id="menuLibrary"><i class="fas fa-book"></i> Your Library</li>
+          <li id="menuLiked"><i class="fas fa-heart"></i> Liked Tracks</li>
+        </ul>
+
+        <a
+          href="https://dream-streamer.auth.us-east-1.amazoncognito.com/logout?client_id=6bsrtbnlgldgpdfcr7l9j0ajuc&logout_uri=https://d3olgxgavi4bx6.cloudfront.net/index.html"
+          class="logout-btn"
+          >Logout</a
+        >
+      </nav>
+      <main class="content">
+        <!-- <a href="./customer_dashboard.html" class="back-link">
+          <i class="fas fa-arrow-left" id="back"></i>
+        </a> -->
+
+        <div class="album-details" id="albumDetails">
+          <!-- Album details will be inserted here by JavaScript -->
+        </div>
+        <h2>Tracks</h2>
+        <ul id="tracksList">
+          <!-- Tracks will be inserted here by JavaScript -->
+        </ul>
+
+        <!-- Modal for Purchase -->
+        <div id="purchaseModal" class="modal">
+          <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="modal-header">Purchase Album</div>
+            <div class="modal-body">
+              <form class="purchase-form">
+                <label for="cardNumber">Card Number</label>
+                <input
+                  type="text"
+                  id="cardNumber"
+                  name="cardNumber"
+                  placeholder="1234 5678 9012 3456"
+                  required
+                />
+
+                <label for="expiry">Expiry Date</label>
+                <input
+                  type="text"
+                  id="expiry"
+                  name="expiry"
+                  placeholder="MM/YY"
+                  required
+                />
+
+                <label for="cvv">CVV</label>
+                <input
+                  type="text"
+                  id="cvv"
+                  name="cvv"
+                  placeholder="123"
+                  required
+                />
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="purchase-confirm-btn">Confirm Purchase</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Structure for Artist Details -->
+        <div id="artistModal" class="modal">
+          <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="artistDetails"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Define global variable for logged-in user ID
+      let loggedInUserId;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const albumID = urlParams.get("id");
+        loggedInUserId = localStorage.getItem("userId");
+
+        if (albumID) {
+          fetchAlbumDetails(albumID);
+          fetchAlbumTracks(albumID);
+        } else {
+          console.error("Album ID not found in URL");
+        }
+      });
+
+      async function checkIfAlbumPurchased(albumID) {
+        try {
+          const response = await fetch(
+            `https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/album-purchase?album_id=${albumID}&user_id=${loggedInUserId}`
+          );
+          const data = await response.json();
+
+          if (data.isPurchased) {
+            document.querySelector(".purchase-btn").style.display = "none";
+            document.getElementById("albumDetails").innerHTML += `
+        <p class="purchase-status">Album already purchased</p>
+      `;
+
+            // Enable the download buttons and restore styles
+            document.querySelectorAll(".download-btn").forEach((btn) => {
+              btn.disabled = false; // Enable the button
+              btn.querySelector("i").classList.remove("disabled-icon"); // Remove greyed-out icon
+            });
+          }
+        } catch (error) {
+          console.error("Error checking if album is purchased:", error);
+        }
+      }
+
+      async function fetchAlbumDetails(albumID) {
+        try {
+          const response = await fetch(
+            `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/album?AlbumID=${albumID}`
+          );
+          const data = await response.json();
+          const album = data.Item; // Access the Item from the response
+
+          if (!album) {
+            throw new Error("Album data is missing in the response");
+          }
+
+          const artistName = await fetchArtistName(album.Artist);
+
+          const albumDetailsDiv = document.getElementById("albumDetails");
+
+          // Render album details and the purchase button
+          albumDetailsDiv.innerHTML = `
+      <div class="album-header">
+        <img src="${album.AlbumArtURL || "default-placeholder.jpg"}" alt="${
+            album.AlbumName || "No Name"
+          }" class="album-art">
+        <div class="album-info">
+          <h2>${album.AlbumName || "No Name"}</h2>
+          <p><strong>Artist:</strong> <span class="artist-name" data-artist-id="${
+            album.Artist
+          }" style="cursor: pointer;">${artistName || "Unknown"}</span></p>
+          <p><strong>Year:</strong> ${album.AlbumYear || "Unknown"}</p>
+          <p><strong>Genre:</strong> ${album.Genre || "Unknown"}</p>
+          <p><strong>Price:</strong> $${album.AlbumPrice || "Unknown"}</p>
+        </div>
+      </div>
+      <button class="purchase-btn"><i class="fas fa-shopping-cart"></i> Purchase Album</button>
+    `;
+
+          // Add click event listener for artist name to open the modal
+          document
+            .querySelector(".artist-name")
+            .addEventListener("click", function () {
+              const artistID = this.getAttribute("data-artist-id");
+              fetchArtistDetails(artistID);
+            });
+
+          // Now that the album details and purchase button are rendered, check if the album is purchased
+          checkIfAlbumPurchased(albumID);
+        } catch (error) {
+          console.error("Error fetching album details:", error);
+        }
+      }
+
+      async function fetchArtistDetails(artistID) {
+        try {
+          const response = await fetch(
+            `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/artist?ArtistID=${artistID}`
+          );
+          const data = await response.json();
+
+          if (data.Item) {
+            const artist = data.Item;
+            const artistModal = document.getElementById("artistModal");
+
+            // Populate modal with artist details
+            artistModal.innerHTML = `
+        <div class="modal-content">
+          <span class="close-btn">&times;</span>
+          <div class="artist-modal-body">
+            <img src="${
+              artist.ArtistImageURL || "default-placeholder.jpg"
+            }" alt="Artist Image">
+            <h2>${artist.Name || "Unknown Artist"}</h2>
+            <p>${artist.Bio || "No bio available."}</p>
+            <p><strong>Debut Year:</strong> ${artist.DebutYear || "Unknown"}</p>
+          </div>
+        </div>
+      `;
+
+            // Display the modal
+            artistModal.style.display = "block";
+
+            // Close modal when clicking on the close button
+            artistModal
+              .querySelector(".close-btn")
+              .addEventListener("click", function () {
+                artistModal.style.display = "none";
+              });
+
+            // Close modal if clicked outside of modal content
+            window.onclick = function (event) {
+              if (event.target === artistModal) {
+                artistModal.style.display = "none";
+              }
+            };
+          } else {
+            throw new Error("Artist details not found");
+          }
+        } catch (error) {
+          console.error("Error fetching artist details:", error);
+        }
+      }
+
+      async function fetchArtistName(artistID) {
+        try {
+          const response = await fetch(
+            `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/artist?ArtistID=${artistID}`
+          );
+          const data = await response.json();
+
+          if (data.Item && data.Item.Name) {
+            return data.Item.Name;
+          } else {
+            throw new Error("Artist not found");
+          }
+        } catch (error) {
+          console.error("Error fetching artist name:", error);
+          return "Unknown Artist"; // Handle error gracefully
+        }
+      }
+
+      function fetchAlbumTracks(albumID) {
+        fetch(
+          `https://nnvieofzae.execute-api.us-east-1.amazonaws.com/dev/album-tracks?AlbumID=${albumID}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const tracksList = document.getElementById("tracksList");
+            const tracks = data.Items; // Store fetched tracks in global variable
+
+            if (tracks && tracks.length > 0) {
+              tracksList.innerHTML = tracks
+                .map(
+                  (track) => `
+          <li class="track-item">
+              <img src="${
+                track.TrackImageURL || "default-placeholder.jpg"
+              }" alt="${track.Name || "No Image"}" class="track-art">
+              <div class="track-info">
+                  <strong>${track.Name || "No Track Name"}</strong><br>
+                  ${track.Label || "No Label"}<br>
+                  Release Date: ${
+                    track.ReleaseDate || "Unknown Release Date"
+                  }<br>
+              </div>
+              <div class="audio-player">
+                  <audio controls data-track-id="${track.TrackID}">
+                      <source src="${track.TrackURL}" type="audio/mpeg">
+                      Your browser does not support the audio element.
+                  </audio>
+              </div>
+              <button class="like-btn" data-track-id="${
+                track.TrackID
+              }"><i class="far fa-heart"></i></button>
+              <button class="download-btn" data-track-url="${
+                track.TrackURL
+              }" data-track-name="${
+                    track.Name
+                  }" disabled><i class="fas fa-download"></i></button>
+          </li>
+        `
+                )
+                .join("");
+
+              document
+                .querySelectorAll(".like-btn")
+                .forEach((button) => updateLikeIcon(button));
+
+              // Initially, disable the download buttons and add a grey icon
+              document.querySelectorAll(".download-btn").forEach((button) => {
+                button.addEventListener("click", downloadTrack);
+                button.disabled = true; // Disable by default
+                button.querySelector("i").classList.add("disabled-icon"); // Apply grey style
+              });
+
+              // Add event listeners to <audio> elements for the play event
+              document.querySelectorAll("audio").forEach((audio) => {
+                audio.addEventListener("play", (event) => {
+                  const trackID = event.target.getAttribute("data-track-id");
+                  const trackURL = event.target.querySelector("source").src;
+                  console.log(`Playing track: ${trackURL}`);
+                  recordTrackEngagement(trackID);
+                });
+              });
+
+              checkIfAlbumPurchased(albumID); // Call the function to check purchase status and update buttons
+            } else {
+              tracksList.innerHTML = "<li>No tracks found for this album.</li>";
+            }
+          })
+          .catch((error) =>
+            console.error("Error fetching album tracks:", error)
+          );
+      }
+
+      function recordTrackEngagement(trackID) {
+        return fetch(
+          "https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/track-engage",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              track_id: trackID,
+            }),
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Failed to record engagement: ${response.status}`
+              );
+            }
+            return response.json();
+          })
+          .catch((error) => {
+            console.error("Error recording engagement:", error);
+          });
+      }
+
+      function downloadTrack(event) {
+        const trackURL = event.currentTarget.dataset.trackUrl;
+        const trackName = event.currentTarget.dataset.trackName; // Get the track name
+
+        const link = document.createElement("a");
+        link.href = trackURL;
+        link.download = `${trackName}.mp3`; // Use the track's name as the filename
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link); // Clean up the link element after download
+      }
+
+      // Update the like icon based on the track's like status
+      async function updateLikeIcon(button) {
+        const trackID = button.dataset.trackId;
+
+        try {
+          const response = await fetch(
+            `https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/view-likes?track_id=${trackID}&user_id=${loggedInUserId}`
+          );
+          const data = await response.json();
+
+          const likeIcon = button.querySelector("i");
+
+          if (data.isLiked) {
+            likeIcon.classList.remove("far");
+            likeIcon.classList.add("fas");
+          } else {
+            likeIcon.classList.remove("fas");
+            likeIcon.classList.add("far");
+          }
+
+          // Attach click event handler after like status is determined
+          button.addEventListener("click", handleLikeClick);
+        } catch (error) {
+          console.error("Error checking like status:", error);
+        }
+      }
+
+      async function handleLikeClick(event) {
+        const button = event.currentTarget; // The clicked button
+        const trackID = button.dataset.trackId; // Get the track ID from the button's data attribute
+        const likeIcon = button.querySelector("i"); // Get the <i> element within the button
+
+        if (!trackID) {
+          console.error("Track ID is missing");
+          return;
+        }
+
+        try {
+          const isLiked = likeIcon.classList.contains("fas"); // Check if currently liked (solid heart)
+
+          // Make a request to like/unlike the track based on the current status
+          const response = await fetch(
+            "https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/like-track",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                track_id: trackID,
+                user_id: loggedInUserId,
+                action: isLiked ? "unlike" : "like", // Toggle action
+              }),
+            }
+          );
+
+          // Check if the response was successful
+          if (!response.ok) {
+            throw new Error(
+              `Failed to toggle like status. HTTP Status: ${response.status}`
+            );
+          }
+
+          // Handle the plain text response
+          const result = await response.text();
+
+          console.log(result);
+
+          // Toggle the heart icon based on the response
+          if (result.includes("successfully")) {
+            if (isLiked) {
+              likeIcon.classList.remove("fas");
+              likeIcon.classList.add("far");
+            } else {
+              likeIcon.classList.remove("far");
+              likeIcon.classList.add("fas");
+            }
+          } else {
+            console.error(
+              "Failed to toggle like status (Unexpected backend response)"
+            );
+          }
+        } catch (error) {
+          console.error("Error liking/unliking the track:", error);
+        }
+      }
+
+      function formatDuration(seconds) {
+        if (!seconds) return "Unknown Duration";
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+      }
+
+      // Open Modal when purchase button is clicked
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelector(".content")
+          .addEventListener("click", function (event) {
+            if (event.target.matches(".purchase-btn")) {
+              openModal();
+            }
+          });
+
+        const modal = document.getElementById("purchaseModal");
+        const closeModalBtn = document.querySelector(".close-btn");
+
+        // Open modal
+        function openModal() {
+          modal.style.display = "block";
+        }
+
+        // Close modal
+        closeModalBtn.onclick = function () {
+          modal.style.display = "none";
+        };
+
+        // Close modal if clicked outside of modal content
+        window.onclick = function (event) {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        };
+
+        // Confirm purchase action
+        document
+          .querySelector(".purchase-confirm-btn")
+          .addEventListener("click", async function () {
+            const form = document.querySelector(".purchase-form");
+
+            if (form.checkValidity()) {
+              // Prepare data for API
+              const albumID = new URLSearchParams(window.location.search).get(
+                "id"
+              );
+              const userID = localStorage.getItem("userId");
+
+              // Make POST request to the album purchase API
+              try {
+                const response = await fetch(
+                  "https://o008nh53wd.execute-api.us-east-1.amazonaws.com/dev/album-purchase",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      album_id: albumID,
+                      user_id: userID,
+                    }),
+                  }
+                );
+
+                if (response.ok) {
+                  // Assuming the response body contains a success message
+                  const result = await response.json();
+                  console.log("Purchase successful:", result);
+                  alert("Album purchased successfully!");
+                  modal.style.display = "none"; // Close modal after successful purchase
+                } else {
+                  const errorText = await response.text();
+                  console.error("Error purchasing album:", errorText);
+                  alert("Error purchasing album. Please try again.");
+                }
+              } catch (error) {
+                console.error("Error during purchase:", error);
+                alert("Something went wrong. Please try again later.");
+              }
+            } else {
+              alert("Please fill out all required fields.");
+            }
+          });
+      });
+
+      document
+        .getElementById("menuHome")
+        .addEventListener("click", function () {
+          window.location.href = "index.html";
+        });
+      document
+        .getElementById("menuAlbums")
+        .addEventListener("click", function () {
+          window.location.href = "customer_dashboard.html";
+        });
+      document
+        .getElementById("menuSearch")
+        .addEventListener("click", function () {
+          window.location.href = "search.html";
+        });
+      document
+        .getElementById("menuLibrary")
+        .addEventListener("click", function () {
+          window.location.href = "library.html";
+        });
+      document
+        .getElementById("menuLiked")
+        .addEventListener("click", function () {
+          window.location.href = "liked.html";
+        });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const currentLocation = window.location.href;
+
+        const menuItems = {
+          home: document.getElementById("menuHome"),
+          albums: document.getElementById("menuAlbums"),
+          search: document.getElementById("menuSearch"),
+          library: document.getElementById("menuLibrary"),
+          liked: document.getElementById("menuLiked"),
+        };
+
+        // Remove active class from all menu items
+        function removeActiveClass() {
+          Object.values(menuItems).forEach((menuItem) => {
+            menuItem.classList.remove("active");
+          });
+        }
+
+        // Determine which menu item to highlight based on the URL
+        removeActiveClass(); // Reset all menu items
+        if (currentLocation.includes("index.html")) {
+          menuItems.home.classList.add("active");
+        } else if (currentLocation.includes("customer_dashboard.html")) {
+          menuItems.albums.classList.add("active");
+        } else if (currentLocation.includes("view-album.html")) {
+          menuItems.albums.classList.add("active");
+        } else if (currentLocation.includes("search.html")) {
+          menuItems.search.classList.add("active");
+        } else if (currentLocation.includes("library.html")) {
+          menuItems.library.classList.add("active");
+        } else if (currentLocation.includes("liked.html")) {
+          menuItems.liked.classList.add("active");
+        }
+      });
+    </script>
+  </body>
+</html>
